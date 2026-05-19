@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucas & Ruby's Communication Station - Fun Typing Practice for Kids</title>
+    <meta name="description" content="An interactive and educational typing game for children. Help Lucas and Ruby practice spelling common words and everyday sentences in a friendly environment.">
+    <meta name="keywords" content="typing practice for kids, educational games, spelling words, Lucas and Ruby, kids typing game, learning tools">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="Lucas & Ruby's Communication Station - Fun Typing Practice">
+    <meta property="og:description" content="An interactive and educational typing game for children to practice spelling and communication.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Structured Data (JSON-LD) for Google Search -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Lucas & Ruby's Communication Station",
+      "operatingSystem": "Any",
+      "applicationCategory": "EducationalGame",
+      "description": "A friendly typing game for kids to learn spelling and sentence construction."
+    }
+    </script>
+
+    <style>
+        :root { --bg-color: #eef2ff; --text-correct: #38a169; --text-current: #3182ce; --accent: #ed64a6; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        #container { background: white; padding: 30px; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; max-width: 700px; width: 90%; }
+        button { padding: 12px 20px; font-size: 16px; cursor: pointer; border: none; border-radius: 10px; background: var(--text-current); color: white; margin: 5px; }
+        #display-text { font-size: 48px; letter-spacing: 5px; margin: 30px 0; min-height: 80px; word-wrap: break-word; }
+        .correct { color: var(--text-correct); }
+        .current { color: var(--text-current); border-bottom: 6px solid var(--text-current); }
+        .character-img { width: 180px; border-radius: 20px; border: 5px solid var(--accent); }
+        #hidden-input { position: absolute; left: -9999px; opacity: 0; }
+        .support-link { margin-top: 25px; padding: 15px; background: #f0f0f0; border-radius: 10px; }
+        .support-link a { color: var(--text-current); text-decoration: none; font-size: 16px; font-weight: bold; }
+        .support-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div id="container">
+    <div class="mode-buttons">
+        <button onclick="setMode(&#39;words&#39;)">Simple Words</button>
+        <button onclick="setMode(&#39;sentences&#39;)">Everyday Sentences</button>
+    </div>
+
+    <div id="game-area" style="display: block;">
+        <div id="display-text"><span class="correct">O</span><span class="correct">R</span><span class="current">A</span><span>N</span><span>G</span><span>E</span></div>
+    </div>
+
+    <div id="reward-area" style="display: none;">
+        <img id="reward-img" class="character-img" src="./DevTyping2_files/Ruby.jpg" alt="Lucas or Ruby">
+        <div style="font-size: 28px; margin-top: 15px;">You did it! 👍</div>
+        <div class="instruction" id="reward-instruction">Next word coming...</div>
+    </div>
+    
+    <div class="support-link">
+        <a href="https://www.paypal.com/paypalme/KSriPurushottam" target="_blank">❤️ Support the Developer via PayPal</a>
+    </div>
+</div>
+
+<!-- Hidden input to capture keystrokes -->
+<input type="text" id="hidden-input" autocomplete="off" autocapitalize="off">
+
+<script>
+    // 100+ Words
+    const wordList = [
+        // Animals (20)
+        "CAT", "DOG", "BIRD", "FISH", "LION", "BEAR", "DEER", "MOOSE", "WOLF", "FOX",
+        "DUCK", "GOOSE", "HORSE", "COW", "PIG", "SHEEP", "GOAT", "CHICKEN", "RABBIT", "MOUSE",
+        
+        // Colors (15)
+        "RED", "BLUE", "GREEN", "YELLOW", "ORANGE", "PURPLE", "PINK", "BROWN", "BLACK", "WHITE",
+        "GRAY", "GOLD", "SILVER", "TAN", "NAVY",
+        
+        // Food (20)
+        "APPLE", "BANANA", "GRAPE", "MANGO", "PEACH", "PLUM", "CHERRY", "BERRY", "MELON", "LEMON",
+        "BREAD", "CHEESE", "MILK", "EGG", "MEAT", "RICE", "PASTA", "SOUP", "SALAD", "PIZZA",
+        
+        // Nature (15)
+        "SUN", "MOON", "STAR", "SKY", "CLOUD", "RAIN", "SNOW", "WIND", "TREE", "FLOWER",
+        "GRASS", "LEAF", "ROCK", "RIVER", "LAKE",
+        
+        // Objects (15)
+        "BOOK", "PEN", "CUP", "BOX", "BED", "CHAIR", "TABLE", "DOOR", "WINDOW", "LAMP",
+        "PHONE", "CLOCK", "BALL", "TOY", "CAR",
+        
+        // People/Family (15)
+        "MOM", "DAD", "BABY", "BOY", "GIRL", "MAN", "WOMAN", "KID", "FRIEND", "TEACHER",
+        "DOCTOR", "NURSE", "POLICE", "FIRE", "WORKER"
+    ];
+
+    // More sentences with simpler words
+    const sentenceList = [
+        "I AM HAPPY", "TIME TO EAT", "LOOK AT ME", "I LIKE IT", "PLAY WITH ME",
+        "I LOVE YOU", "GOOD MORNING", "I CAN DO IT", "YES I CAN", "NO I CAN NOT",
+        "I WANT FOOD", "I LIKE TO PLAY", "YOU ARE NICE", "I AM A KID", "I LIKE BOOKS",
+        "I WENT TO SCHOOL", "I ATE MY LUNCH","I USED MY PENCIL", "I LOVE TO RIDE A TRAM",
+        "NAUGHTY BOY DEV", "LOVE YOU MOM", "I LIKE TRAILS", "I LIKE RIVERDALE FARM", 
+        "I LIKE CARS", "I LIKE REPAIRING CARS", "I AM A ENGINEER"
+    ];
+    
+    const characters = ["Lucas.jpg", "Ruby.jpg"]; 
+
+    let mode = 'words';
+    let currentTarget = "";
+    let currentIndex = 0;
+    let inReward = false;
+    let completionTimer = null;
+    let autoAdvanceTimer = null;
+    const hiddenInput = document.getElementById('hidden-input');
+
+    // Keep focus on hidden input
+    function keepFocus() {
+        hiddenInput.focus();
+    }
+
+    // Set focus on load and when clicking buttons
+    window.addEventListener('load', keepFocus);
+    document.addEventListener('click', keepFocus);
+
+    function setMode(newMode) {
+        mode = newMode;
+        inReward = false;
+        if (completionTimer) clearTimeout(completionTimer);
+        clearTimeout(autoAdvanceTimer);
+        keepFocus();
+        nextTask();
+    }
+
+    function nextTask() {
+        inReward = false;
+        if (completionTimer) clearTimeout(completionTimer);
+        document.getElementById('reward-area').style.display = 'none';
+        document.getElementById('game-area').style.display = 'block';
+        currentIndex = 0;
+        hiddenInput.value = '';
+        keepFocus();
+
+        if (mode === 'words') {
+            currentTarget = wordList[Math.floor(Math.random() * wordList.length)];
+        } else if (mode === 'sentences') {
+            currentTarget = sentenceList[Math.floor(Math.random() * sentenceList.length)];
+        }
+        render();
+    }
+
+    function render() {
+        let html = "";
+        for (let i = 0; i < currentTarget.length; i++) {
+            if (i < currentIndex) {
+                html += `<span class="correct">${currentTarget[i]}</span>`;
+            } else if (i === currentIndex) {
+                html += `<span class="current">${currentTarget[i]}</span>`;
+            } else {
+                html += `<span>${currentTarget[i]}</span>`;
+            }
+        }
+        document.getElementById('display-text').innerHTML = html;
+    }
+
+    // Use input event on hidden field
+    hiddenInput.addEventListener('input', function(e) {
+        if (inReward) {
+            hiddenInput.value = '';
+            return;
+        }
+        
+        let input = hiddenInput.value;
+        if (input.length > 0) {
+            let lastChar = input[input.length - 1];
+            let expectedChar = currentTarget.charAt(currentIndex);
+            
+            // Handle space
+            if (expectedChar === " ") {
+                if (lastChar === " ") {
+                    currentIndex++;
+                    render();
+                    checkCompletion();
+                }
+            } else {
+                // Handle regular characters
+                if (lastChar.toUpperCase() === expectedChar) {
+                    currentIndex++;
+                    render();
+                    checkCompletion();
+                }
+            }
+            // Clear input after each character
+            hiddenInput.value = '';
+        }
+    });
+
+    // Handle SPACE key for reward screen
+    document.addEventListener('keydown', function(e) {
+        if (inReward && e.code === "Space") {
+            e.preventDefault();
+            nextTask();
+        }
+    });
+
+    function checkCompletion() {
+        if (currentIndex === currentTarget.length) {
+            inReward = true;
+            if (completionTimer) clearTimeout(completionTimer);
+            completionTimer = setTimeout(() => {
+                if (!inReward) return; // Don't show reward if we already skipped to next task
+
+                document.getElementById('game-area').style.display = 'none';
+                document.getElementById('reward-area').style.display = 'block';
+                document.getElementById('reward-img').src = characters[Math.floor(Math.random() * characters.length)];
+                
+                // Auto-advance for words mode after 2 seconds
+                if (mode === 'words') {
+                    document.getElementById('reward-instruction').innerHTML = "Next word coming...";
+                    autoAdvanceTimer = setTimeout(() => {
+                        nextTask();
+                    }, 2000);
+                } else {
+                    // For sentences, show space instruction
+                    document.getElementById('reward-instruction').innerHTML = "Press <b>SPACE</b> for the next one";
+                }
+            }, 300);
+        }
+    }
+
+    nextTask();
+</script>
+
+</body></html>
